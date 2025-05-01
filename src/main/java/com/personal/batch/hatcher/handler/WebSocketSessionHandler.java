@@ -68,10 +68,12 @@ public class WebSocketSessionHandler extends StompSessionHandlerAdapter
             session.disconnect();
             sessionManager.getStompSession().disconnect();
             sessionManager.setStompSession(null);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             log.error("Caught {} while trying to disconnect from the web socket session. {}", e.getClass().getSimpleName(), e.getMessage());
-        } finally
+        }
+        finally
         {
             attemptReconnect();
         }
