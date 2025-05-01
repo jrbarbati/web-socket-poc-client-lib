@@ -3,6 +3,7 @@ package com.personal.batch.hatcher.annotation;
 import com.personal.batch.hatcher.config.WebSocketContext;
 import com.personal.batch.hatcher.publish.message.BatchRunRequest;
 import com.personal.batch.hatcher.publish.service.BatchRunPublisher;
+import com.personal.batch.hatcher.topic.message.BatchRunResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -11,6 +12,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Aspect
@@ -53,12 +55,14 @@ public class DistributedBatchAspect
     {
         log.info("Requesting to run distributed batch {} for org {}", distributedBatch.name(), distributedBatch.orgId());
 
-        return batchRunPublisher.publishAndAwaitResponse(
+        CompletableFuture<BatchRunResponse> future = batchRunPublisher.publishAndAwaitResponse(
                 BatchRunRequest.builder()
                         .instanceId(WebSocketContext.getInstanceId())
                         .name(distributedBatch.name())
                         .orgId(distributedBatch.orgId())
                         .build()
-        ).get(5, TimeUnit.SECONDS).shouldRun();
+        );
+
+        return future.get(5, TimeUnit.SECONDS).shouldRun();
     }
 }

@@ -27,11 +27,18 @@ public class HeartbeatRunner
     @Scheduled(cron = "${web-socket-poc.scheduled.heartbeat.cron}")
     public void heartbeat()
     {
-        heartbeatPublisher.publish(
-                Heartbeat.builder()
-                        .instanceId(WebSocketContext.getInstanceId())
-                        .build()
-        );
-        log.info("Heartbeat published.");
+        try
+        {
+            heartbeatPublisher.publish(
+                    Heartbeat.builder()
+                            .instanceId(WebSocketContext.getInstanceId())
+                            .build()
+            );
+            log.info("Heartbeat published.");
+        }
+        catch (Exception e)
+        {
+            log.error("Heartbeat publish failed. {} - {}", e.getClass().getSimpleName(), e.getMessage());
+        }
     }
 }

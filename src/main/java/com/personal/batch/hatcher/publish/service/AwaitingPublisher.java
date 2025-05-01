@@ -1,8 +1,11 @@
 package com.personal.batch.hatcher.publish.service;
 
 import com.personal.batch.hatcher.handler.WebSocketSessionManager;
+import com.personal.batch.hatcher.publish.exception.PublishingException;
 import com.personal.batch.hatcher.publish.message.PublishableMessage;
 import com.personal.batch.hatcher.topic.message.TopicMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 
 public abstract class AwaitingPublisher<T extends PublishableMessage, U extends TopicMessage>
 {
+    private static final Logger log = LogManager.getLogger(AwaitingPublisher.class);
     private final String uri;
     private final WebSocketSessionManager sessionManager;
     private final ConcurrentHashMap<UUID, CompletableFuture<U>> responses;
@@ -21,8 +25,15 @@ public abstract class AwaitingPublisher<T extends PublishableMessage, U extends 
         this.responses = new ConcurrentHashMap<>();
     }
 
-    public CompletableFuture<U> publishAndAwaitResponse(T message)
+    public CompletableFuture<U> publishAndAwaitResponse(T message) throws PublishingException
     {
+        if (!getSessionManager().isConnected())
+        {
+            String errorMessage = "Session is disconnected. Unable to publish message.";
+            log.error(errorMessage);
+            throw new PublishingException(errorMessage);
+        }
+
         CompletableFuture<U> future = new CompletableFuture<>();
 
         if (message.getCorrelationId() == null)
