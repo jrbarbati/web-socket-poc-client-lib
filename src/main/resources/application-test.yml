@@ -1,9 +1,10 @@
 web-socket-poc:
-  url: "ws://localhost:8080/ws-poc"
+  url: "ws://localhost:9001/ws-poc"
   publish:
-    hello: "/app/hello"
+    heartbeat: "/app/heartbeat"
+    batch-run: "/app/batch-run"
   topics:
-    greetings: "/topic/greetings"
+    batch-run: "/topic/batch-run"
   scheduled:
     heartbeat:
       enabled: true
