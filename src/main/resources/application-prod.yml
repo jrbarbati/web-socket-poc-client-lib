@@ -1,0 +1,10 @@
+web-socket-poc:
+  url: "ws://localhost:9001/ws-poc"
+  publish:
+    hello: "/app/hello"
+  topics:
+    greetings: "/topic/greetings"
+  scheduled:
+    heartbeat:
+      enabled: true
+      cron: '*/2 * * * * *'
