@@ -18,6 +18,6 @@ public class OnStartup
     public void onApplicationReady()
     {
         WebSocketContext.setInstanceId(UUID.randomUUID());
-        log.info("Created UUID for WebSocket Context: {}", WebSocketContext.getInstanceId());
+        log.trace("Created UUID for WebSocket Context: {}", WebSocketContext.getInstanceId());
     }
 }

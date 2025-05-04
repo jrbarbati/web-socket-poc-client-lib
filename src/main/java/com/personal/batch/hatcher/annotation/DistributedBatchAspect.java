@@ -9,9 +9,12 @@ import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -34,13 +37,13 @@ public class DistributedBatchAspect
     {
         try
         {
-            if (!determineIfIShouldRun(distributedBatch))
+            if (!determineIfIShouldRun(distributedBatch, joinPoint))
             {
-                log.info("Not allowed to execute batch job {} for org {}", distributedBatch.name(), distributedBatch.orgId());
+                log.trace("Not allowed to execute batch job {} for org {}", distributedBatch.name(), distributedBatch.orgId());
                 return null;
             }
 
-            log.info("Executing batch job {} for org {}", distributedBatch.name(), distributedBatch.orgId());
+            log.trace("Executing batch job {} for org {}", distributedBatch.name(), distributedBatch.orgId());
 
             return joinPoint.proceed();
         }
@@ -51,18 +54,43 @@ public class DistributedBatchAspect
         }
     }
 
-    protected boolean determineIfIShouldRun(DistributedBatch distributedBatch) throws Exception
+    protected boolean determineIfIShouldRun(DistributedBatch distributedBatch, ProceedingJoinPoint joinPoint) throws Exception
     {
-        log.info("Requesting to run distributed batch {} for org {}", distributedBatch.name(), distributedBatch.orgId());
+        Integer orgId = distributedBatch.orgId() != 0
+                ? Integer.valueOf(distributedBatch.orgId())
+                : extractOrgId(joinPoint);
+
+        log.trace("Requesting to run distributed batch {} for org {}", distributedBatch.name(), orgId);
 
         CompletableFuture<BatchRunResponse> future = batchRunPublisher.publishAndAwaitResponse(
                 BatchRunRequest.builder()
                         .instanceId(WebSocketContext.getInstanceId())
                         .name(distributedBatch.name())
-                        .orgId(distributedBatch.orgId())
+                        .orgId(orgId)
                         .build()
         );
 
         return future.get(5, TimeUnit.SECONDS).shouldRun();
+    }
+
+    private Integer extractOrgId(ProceedingJoinPoint joinPoint)
+    {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        Object[] args = joinPoint.getArgs();
+
+        for (int i = 0; i < parameterAnnotations.length; i++)
+            for (Annotation annotation : parameterAnnotations[i])
+                if (annotation instanceof OrgIdParam)
+                {
+                    Object value = args[i];
+                    if (value instanceof Integer)
+                        return (Integer) value;
+
+                    throw new IllegalArgumentException("@OrgIdParam must be on an Integer parameter");
+                }
+
+        return null;
     }
 }

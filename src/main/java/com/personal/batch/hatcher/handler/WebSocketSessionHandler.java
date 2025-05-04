@@ -45,14 +45,14 @@ public class WebSocketSessionHandler extends StompSessionHandlerAdapter
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders)
     {
-        log.info("Connected.");
+        log.trace("Connected.");
 
         retryAttempt.set(0);
         reconnecting.set(false);
 
         subscriptions.forEach(sub -> {
             session.subscribe(sub.topic(), sub.handler());
-            log.info("Subscribed to {}", sub.topic());
+            log.trace("Subscribed to {}", sub.topic());
         });
 
         sessionManager.setStompSession(session);
@@ -89,7 +89,7 @@ public class WebSocketSessionHandler extends StompSessionHandlerAdapter
             {
                 int attempt = retryAttempt.incrementAndGet();
                 int delay = Math.min(initialDelaySeconds * (1 << (attempt - 1)), maxDelaySeconds);
-                log.info("Reconnect attempt {}. Waiting {} seconds before retrying...", attempt, delay);
+                log.trace("Reconnect attempt {}. Waiting {} seconds before retrying...", attempt, delay);
 
                 try
                 {

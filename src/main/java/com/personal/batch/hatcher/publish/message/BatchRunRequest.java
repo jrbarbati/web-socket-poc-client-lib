@@ -6,7 +6,7 @@ public class BatchRunRequest extends PublishableMessage
 {
     private UUID instanceId;
     private String name;
-    private int orgId;
+    private Integer orgId;
 
     public UUID getInstanceId()
     {
@@ -28,12 +28,12 @@ public class BatchRunRequest extends PublishableMessage
         this.name = name;
     }
 
-    public int getOrgId()
+    public Integer getOrgId()
     {
         return orgId;
     }
 
-    public void setOrgId(int orgId)
+    public void setOrgId(Integer orgId)
     {
         this.orgId = orgId;
     }
@@ -59,7 +59,7 @@ public class BatchRunRequest extends PublishableMessage
             return this;
         }
 
-        public Builder orgId(int orgId)
+        public Builder orgId(Integer orgId)
         {
             batchRunRequest.setOrgId(orgId);
             return this;

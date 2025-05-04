@@ -1,13 +1,17 @@
 package com.personal.batch.hatcher.topic.message;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.UUID;
 
 public class BatchRunResponse extends TopicMessage
 {
     private UUID instanceId;
     private String name;
-    private int orgId;
-    private boolean shouldRun;
+    private Integer orgId;
+
+    @JsonProperty("shouldRun")
+    private Boolean shouldRun;
 
     public UUID getInstanceId()
     {
@@ -29,22 +33,27 @@ public class BatchRunResponse extends TopicMessage
         this.name = name;
     }
 
-    public int getOrgId()
+    public Integer getOrgId()
     {
         return orgId;
     }
 
-    public void setOrgId(int orgId)
+    public void setOrgId(Integer orgId)
     {
         this.orgId = orgId;
     }
 
-    public boolean shouldRun()
+    @JsonProperty("shouldRun")
+    public Boolean shouldRun()
     {
+        if (shouldRun == null)
+            shouldRun = false;
+
         return shouldRun;
     }
 
-    public void setShouldRun(boolean shouldRun)
+    @JsonProperty("shouldRun")
+    public void setShouldRun(Boolean shouldRun)
     {
         this.shouldRun = shouldRun;
     }

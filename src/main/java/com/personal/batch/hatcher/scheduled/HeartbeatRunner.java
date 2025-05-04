@@ -34,7 +34,7 @@ public class HeartbeatRunner
                             .instanceId(WebSocketContext.getInstanceId())
                             .build()
             );
-            log.info("Heartbeat published.");
+            log.trace("Heartbeat published.");
         }
         catch (Exception e)
         {
