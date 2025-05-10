@@ -37,13 +37,17 @@ public class DistributedBatchAspect
     {
         try
         {
+            Integer orgId = distributedBatch.orgId() != 0
+                    ? Integer.valueOf(distributedBatch.orgId())
+                    : extractOrgId(joinPoint);
+
             if (!determineIfIShouldRun(distributedBatch, joinPoint))
             {
-                log.trace("Not allowed to execute batch job {} for org {}", distributedBatch.name(), distributedBatch.orgId());
+                log.trace("Not allowed to execute batch job {} for org {}", distributedBatch.name(), orgId);
                 return null;
             }
 
-            log.trace("Executing batch job {} for org {}", distributedBatch.name(), distributedBatch.orgId());
+            log.trace("Executing batch job {} for org {}", distributedBatch.name(), orgId);
 
             return joinPoint.proceed();
         }
